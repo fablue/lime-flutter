@@ -25,7 +25,7 @@ For help getting started with Flutter, view our online
 [documentation](http://flutter.io/).
 
 I have also written an article about how Lime is built using Flutter (25.05.2017)
-here: [How lime is built](https://github.com/fablue/building-a-social-network-with-flutter/blob/master/lime-preview.gif).
+here: [How lime is built](https://github.com/fablue/building-a-social-network-with-flutter).
 This should help you getting started into Lime development :relaxed:
 
 We encourage you to use all best practices provided by the flutter team.
