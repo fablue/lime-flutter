@@ -30,7 +30,7 @@ This should help you getting started into Lime development :relaxed:
 
 We encourage you to use all best practices provided by the flutter team.
  
-Looking forward to your contribution :1:
+Looking forward to your contribution :+1:
 
 
 Feel free to file bug reports or feature requests! 
