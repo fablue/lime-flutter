@@ -17,6 +17,7 @@ which will be visible inside a certain area. Lime was originally built in java
 <img width=200em src="https://github.com/fablue/building-a-social-network-with-flutter/blob/master/lime-preview.gif?raw=true">
 <img width=200em src="https://github.com/fablue/building-a-social-network-with-flutter/blob/master/lime-preview.png?raw=true">
 </div>
+
 ## Getting Started
 
 Lime is built using Dart and the amazing Flutter :heart: <br>
