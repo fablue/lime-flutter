@@ -1,7 +1,7 @@
 
 
-<img height="100em" src="https://github.com/fablue/lime/blob/master/logo/font_black.png?raw=true">
-
+<img height="100em" src="https://github.com/fablue/lime/blob/master/logo/font_black.png?raw=true"/>
+<img height="100em" src="https://lime.fablue.org:9000/fablue.png"/>
 ## What we are building
 Lime is a social media app, which allows you to post images and text messages 
 which will be visible inside a certain area. Lime was originally built in java 
