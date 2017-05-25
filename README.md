@@ -13,8 +13,8 @@ which will be visible inside a certain area. Lime was originally built in java
  language. 
 
 ### GIF: Lime native android app
-<img width=300em src="https://github.com/fablue/building-a-social-network-with-flutter/blob/master/lime-preview.gif?raw=true">
-<img width=300em src="https://github.com/fablue/building-a-social-network-with-flutter/blob/master/lime-preview.png?raw=true">
+<img width=200em src="https://github.com/fablue/building-a-social-network-with-flutter/blob/master/lime-preview.gif?raw=true">
+<img width=200em src="https://github.com/fablue/building-a-social-network-with-flutter/blob/master/lime-preview.png?raw=true">
 
 ## Getting Started
 
