@@ -27,7 +27,6 @@ MaterialColor limeColor() {
 class LimeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     Lime lime = new Lime();
     return new MaterialApp(
       title: 'Lime',
@@ -43,6 +42,7 @@ class LimeApp extends StatelessWidget {
 
 class MainPage extends StatefulWidget {
   final Lime lime;
+
   MainPage(this.lime);
 
 
@@ -59,13 +59,12 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return new Scaffold(
         backgroundColor: Colors.white,
         appBar: new PreferredSize(
             child: new Card(
-              color: Colors.white,
-              child: new Image.asset("img/font_black.png", height: 30.0)
+                color: Colors.white,
+                child: new Image.asset("img/font_black.png", height: 30.0)
             ),
             preferredSize: new Size.fromHeight(100.0)
         ),
@@ -103,12 +102,9 @@ class _MainPageState extends State<MainPage> {
 
 
   void onTap(int index) {
-    setState(() {
-      pageController.animateToPage(
-          index, duration: const Duration(milliseconds: 300),
-          curve: Curves.ease);
-      page = index;
-    });
+    pageController.animateToPage(
+        index, duration: const Duration(milliseconds: 300),
+        curve: Curves.ease);
   }
 
   void onPageChanged(int page) {
