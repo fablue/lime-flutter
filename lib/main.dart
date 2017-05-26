@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:lime/lime//lime.dart';
 import 'package:lime/widgets/community.dart';
 import 'package:lime/widgets/feed.dart';
