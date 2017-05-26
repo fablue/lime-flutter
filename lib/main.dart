@@ -9,6 +9,7 @@ void main() {
   runApp(new LimeApp());
 }
 
+/// Returns the color scheme used by lime
 MaterialColor limeColor() {
   return new MaterialColor(0xFF0498C1, {
     50: new Color(0xFFE1F3F8),
@@ -61,13 +62,6 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return new Scaffold(
         backgroundColor: Colors.white,
-        appBar: new PreferredSize(
-            child: new Card(
-                color: Colors.white,
-                child: new Image.asset("img/font_black.png", height: 30.0)
-            ),
-            preferredSize: new Size.fromHeight(100.0)
-        ),
         body: new PageView(
             children: [
               new Trends(key: new Key("TRENDS")),
