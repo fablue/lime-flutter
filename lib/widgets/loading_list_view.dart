@@ -113,9 +113,12 @@ class _LoadingListViewState<T> extends State<LoadingListView<T>> {
   Future loadNext() async {
     int page = (objects.length / widget.pageSize).floor();
     List<T> fetched = await widget.pageRequest(page, widget.pageSize);
-    this.setState(() {
-      addObjects(fetched);
-    });
+
+    if(mounted) {
+      this.setState(() {
+        addObjects(fetched);
+      });
+    }
   }
 
 
