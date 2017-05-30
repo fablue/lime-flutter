@@ -100,7 +100,37 @@ class LimeApi {
     return JSON.decode(response.body);
   }
 
+  
+  Future<Map> postMessage({String text, List<int> compressedImage, int parentId}) async{
+    if(compressedImage!=null){
+      return _postFile(text: text, compressedImage: compressedImage, parentId: parentId);
+    }
 
+    else return null;
+  }
+
+  Future<Map> _postFile({String text, List<int> compressedImage, int parentId}) async{
+    var message = {
+      "message": text,
+      "timestamp": new DateTime.now().millisecondsSinceEpoch,
+      "color": color,
+      "latitude": latitude,
+      "longitude": longitude,
+      "parentId": parentId,
+    };
+
+    String messageJson = new JsonEncoder().convert(message);
+    List<int> messageBinary = new Utf8Encoder().convert(messageJson);
+
+
+    MultipartRequest multipartRequest = new MultipartRequest("POST",
+    Uri.parse(Uri.encodeFull("$server/media")))..headers.putIfAbsent("token", ()=>token)
+    ..files.add(new MultipartFile.fromBytes("file", compressedImage))
+    ..files.add(new MultipartFile.fromBytes("message", messageBinary));
+
+    StreamedResponse response = await client.send(multipartRequest);
+    return null;
+  }
 
   String getMediaUrl(String url,{int inScale:null}) {
     return Uri.encodeFull("$server/media/$url");
@@ -141,5 +171,9 @@ class LimeApi {
 
   String get lastImage {
     return null;
+  }
+
+  int get color{
+    return 0;
   }
 }

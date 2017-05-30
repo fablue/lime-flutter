@@ -1,0 +1,89 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:isolate';
+import 'package:image/image.dart' as img;
+import 'package:dart_image/dart_image.dart' as dimg;
+import 'dart:math' as math;
+
+
+class _ImageCompressionMessage {
+  SendPort sendPort;
+  File file;
+}
+
+class ImageUtil {
+  static int max = 1920;
+
+  static Future<List<int>> compressImage(File file) async {
+    ReceivePort receivePort = new ReceivePort();
+    print("Spawning isolate!");
+    Isolate.spawn(_compressImage, new _ImageCompressionMessage()
+      ..sendPort = receivePort.sendPort
+      ..file = file);
+
+    List<int> compressed = await receivePort.first;
+    return compressed;
+  }
+
+  static Future _compressImage(_ImageCompressionMessage message) async {
+    print("Compressing image ${message.file}");
+    File file = message.file;
+    print("Decoding image...");
+    img.Image image = img.decodeImage(file.readAsBytesSync());
+    if (image.width > ImageUtil.max || image.height > ImageUtil.max) {
+      print("Resizing...");
+      image = img.copyResize(image, targetWidth(image));
+      print("Resized to ${image.width}x${image.height}");
+    }
+
+    print("Encoding...");
+    List<int> compressed = img.encodeJpg(image, quality: 70);
+    print("Returning...");
+    message.sendPort.send(compressed);
+  }
+
+  static Future _dCompressImage(_ImageCompressionMessage message) async {
+    print("Compressing image ${message.file}");
+    print("Reading file...");
+    message.file.openSync();
+    List<int> data = message.file.readAsBytesSync();
+
+    print("Decoding image...");
+    dimg.Decoder decoder = new dimg.JpegDecoder();
+    dimg.Image image = decoder.decode(data);
+    if (image.height > ImageUtil.max || image.width > ImageUtil.max) {
+      print("Resizing image...");
+      double max = math.max(image.height, image.width).toDouble();
+      double factor = ImageUtil.max / max;
+      image = image.resized((image.width.toDouble() * factor).round(),
+          (image.height.toDouble() * factor).round());
+
+      print("New image format: ${image.width}x${image.height}");
+    }
+
+    print("Encoding image... ${image.width}x${image.height}");
+    dimg.Encoder encoder = new dimg.JpegEncoder(40);
+    List<int> compressed = encoder.encode(image);
+
+    print("Returning image");
+    message.sendPort.send(compressed);
+  }
+
+  static int targetWidth(img.Image image) {
+    if (image.width > image.height) {
+      if (image.width > ImageUtil.max) {
+        return ImageUtil.max;
+      } else {
+        return image.width;
+      }
+    }
+    else {
+      if (image.height > ImageUtil.max) {
+        double shrinkage = ImageUtil.max.toDouble() / image.height.toDouble();
+        return (image.width.toDouble() * shrinkage).floor();
+      } else {
+        return image.width;
+      }
+    }
+  }
+}

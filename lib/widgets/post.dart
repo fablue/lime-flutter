@@ -248,8 +248,7 @@ class PostImageWidget extends StatelessWidget {
     return new AspectRatio(
         aspectRatio: getAspectRatio(),
         child: new Container(
-            padding: new EdgeInsets.symmetric(vertical: 8.0, horizontal: 2.0),
-
+            padding: new EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0),
             child: new FadingImage.network(getImage(), fit: BoxFit.cover)
         ));
   }

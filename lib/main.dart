@@ -56,10 +56,11 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
 
   PageController pageController;
-  int page = 0;
+  int page = 1;
 
   @override
   Widget build(BuildContext context) {
+
     return new Scaffold(
         backgroundColor: Colors.white,
         body: new PageView(
@@ -91,7 +92,7 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    pageController = new PageController();
+    pageController = new PageController(initialPage: this.page);
   }
 
 

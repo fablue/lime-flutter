@@ -82,7 +82,6 @@ class _FeedState extends State<Feed> {
 
 }
 
-
 class FeedActionButton extends StatefulWidget {
 
   @override
@@ -118,7 +117,6 @@ class _FeedActionButtonState extends State<FeedActionButton> {
   }
 }
 
-
 class FeedModal extends StatefulWidget {
 
   @override
@@ -126,7 +124,6 @@ class FeedModal extends StatefulWidget {
     return new _FeedModalState();
   }
 }
-
 
 class _FeedModalState extends State<FeedModal> with TickerProviderStateMixin {
   AnimationController _clipController;
@@ -139,10 +136,10 @@ class _FeedModalState extends State<FeedModal> with TickerProviderStateMixin {
     _context = context;
     Container container = new Container(
       child: new BackdropFilter(
-        filter: new ImageFilter.blur(sigmaX: 3.0 * _blur, sigmaY: 3.0 * _blur),
+        filter: new ImageFilter.blur(sigmaX: 5.0  , sigmaY: 5.0 ),
         child: new Container(
           decoration: new BoxDecoration(
-              color: Colors.white.withOpacity(0.90)
+              color: Colors.white.withOpacity(0.7)
           ),
           child: new Center(
             child: new PostCreate()
@@ -192,7 +189,6 @@ class _FeedModalState extends State<FeedModal> with TickerProviderStateMixin {
   }
 
 }
-
 
 class _CustomClipper extends CustomClipper<Rect> {
 
