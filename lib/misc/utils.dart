@@ -12,34 +12,30 @@ class _ImageCompressionMessage {
 }
 
 class ImageUtil {
-  static int max = 1920;
+  static const int MAX = 1920;
 
-  static Future<List<int>> compressImage(File file) async {
-    ReceivePort receivePort = new ReceivePort();
-    print("Spawning isolate!");
-    Isolate.spawn(_compressImage, new _ImageCompressionMessage()
-      ..sendPort = receivePort.sendPort
-      ..file = file);
-
-    List<int> compressed = await receivePort.first;
-    return compressed;
+  static List<int> compressImage(File file)  {
+    return __compressImage(file);
   }
 
   static Future _compressImage(_ImageCompressionMessage message) async {
-    print("Compressing image ${message.file}");
-    File file = message.file;
+    message.sendPort.send(__compressImage(message.file));
+  }
+
+  static List<int> __compressImage(File file){
+    print("Compressing image $file");
     print("Decoding image...");
     img.Image image = img.decodeImage(file.readAsBytesSync());
-    if (image.width > ImageUtil.max || image.height > ImageUtil.max) {
+    if (image.width > ImageUtil.MAX || image.height > ImageUtil.MAX) {
       print("Resizing...");
       image = img.copyResize(image, targetWidth(image));
       print("Resized to ${image.width}x${image.height}");
     }
 
     print("Encoding...");
-    List<int> compressed = img.encodeJpg(image, quality: 70);
+    List<int> compressed = img.encodeJpg(image, quality: 50);
     print("Returning...");
-    message.sendPort.send(compressed);
+    return compressed;
   }
 
   static Future _dCompressImage(_ImageCompressionMessage message) async {
@@ -51,10 +47,10 @@ class ImageUtil {
     print("Decoding image...");
     dimg.Decoder decoder = new dimg.JpegDecoder();
     dimg.Image image = decoder.decode(data);
-    if (image.height > ImageUtil.max || image.width > ImageUtil.max) {
+    if (image.height > ImageUtil.MAX || image.width > ImageUtil.MAX) {
       print("Resizing image...");
       double max = math.max(image.height, image.width).toDouble();
-      double factor = ImageUtil.max / max;
+      double factor = ImageUtil.MAX / max;
       image = image.resized((image.width.toDouble() * factor).round(),
           (image.height.toDouble() * factor).round());
 
@@ -71,15 +67,15 @@ class ImageUtil {
 
   static int targetWidth(img.Image image) {
     if (image.width > image.height) {
-      if (image.width > ImageUtil.max) {
-        return ImageUtil.max;
+      if (image.width > ImageUtil.MAX) {
+        return ImageUtil.MAX;
       } else {
         return image.width;
       }
     }
     else {
-      if (image.height > ImageUtil.max) {
-        double shrinkage = ImageUtil.max.toDouble() / image.height.toDouble();
+      if (image.height > ImageUtil.MAX) {
+        double shrinkage = ImageUtil.MAX.toDouble() / image.height.toDouble();
         return (image.width.toDouble() * shrinkage).floor();
       } else {
         return image.width;

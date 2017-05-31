@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lime/lime/lime.dart';
 import 'package:lime/misc/utils.dart';
 
 class PostCreate extends StatefulWidget {
@@ -36,22 +37,29 @@ class _PostCreateState extends State<PostCreate> {
     );
   }
 
-   set image(File file){
+  set image(File file) {
     this._file = file;
   }
 
-   set text(String text) {
+  set text(String text) {
     this._text = text;
   }
 
   Future onPost() async {
     print("Postinng image: $_file with text: $_text");
-    if(_file!=null){
+    List<int> image;
+    if (_file != null) {
       int size = await _file.length();
-      List<int> compressed = await  ImageUtil.compressImage(_file);
-      print("Compression done: first $size then ${compressed.length}");
-
+      image = await lime.site.commission(
+        ImageUtil.compressImage,
+        positionalArgs: [_file]
+      );
+      print("Compression done: first $size then ${image.length}");
     }
+
+  // Map response = await lime.api.postMessage(
+    //   text: _text, compressedImage: image);
+   // print(response);
   }
 
   void dismiss() {
@@ -211,7 +219,7 @@ class _BodyState extends State<_Body> {
 
   Future pickImage() async {
     var image = await ImagePicker.pickImage();
-    widget._postCreateState.image=image;
+    widget._postCreateState.image = image;
     setState(() {
       this.image = image;
     });
@@ -236,7 +244,7 @@ class _Footer extends StatelessWidget {
                       decoration: new InputDecoration(
                           labelText: "Message"
                       ),
-                    onChanged: (String text) => _postCreateState.text=text
+                      onChanged: (String text) => _postCreateState.text = text
                   )
               )
             ]
