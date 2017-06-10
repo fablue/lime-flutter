@@ -3,6 +3,8 @@
 //
 
 #import "GeneratedPluginRegistrant.h"
+#import <image_picker/ImagePickerPlugin.h>
+#import <path_provider/PathProviderPlugin.h>
 
 @implementation GeneratedPluginRegistrant
 

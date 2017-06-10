@@ -62,9 +62,7 @@ class _PostCreateState extends State<PostCreate> {
    // print(response);
   }
 
-  void dismiss() {
 
-  }
 }
 
 

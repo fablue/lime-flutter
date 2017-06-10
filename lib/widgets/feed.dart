@@ -4,6 +4,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lime/lime/lime.dart';
+import 'package:lime/widgets/DismissibleWrapper.dart';
+import 'package:lime/widgets/circular_clip.dart';
+import 'package:lime/widgets/frosted_glas.dart';
 import 'package:lime/widgets/loading_list_view.dart';
 import 'package:lime/widgets/post.dart';
 import 'package:lime/widgets/post_create.dart';
@@ -31,28 +34,29 @@ class Feed extends StatefulWidget {
 class _FeedState extends State<Feed> {
 
   var _buildContext;
-  var _showModal = false;
+
 
   @override
   Widget build(BuildContext context) {
     _buildContext = context;
-    List<Widget> stacked = [];
+
+    Widget w;
+    w = new LoadingListView<Map>(
+        request, widgetAdapter: adapt, pageSize: widget.pageSize,
+        pageThreshold: widget.pageThreshold);
 
 
+    Widget fab = new FeedActionButton();
 
-    Widget scaffold = new Scaffold(
-        body: new LoadingListView<Map>(
-            request, widgetAdapter: adapt, pageSize: widget.pageSize,
-            pageThreshold: widget.pageThreshold),
-        floatingActionButton: !_showModal? new FeedActionButton() :null
+
+    w = new Scaffold(
+      body: w,
+      floatingActionButton: fab,
     );
 
-    stacked.add(scaffold);
-    _showModal? stacked.add(new FeedModal()) : null;
-    return new Stack(
-        children: stacked
-    );
-     }
+
+    return w;
+  }
 
   @override
   void initState() {
@@ -65,18 +69,6 @@ class _FeedState extends State<Feed> {
 
   Widget adapt(Map map) {
     return new Post(map);
-  }
-
-  get showModal {
-    return _showModal;
-  }
-
-  set showModal(bool showModal) {
-    setState(() {
-      this._showModal = showModal;
-    });
-
-
   }
 
 
@@ -110,102 +102,82 @@ class _FeedActionButtonState extends State<FeedActionButton> {
     );
   }
 
-  onPressed() {
-    _FeedState feedState = _context.ancestorStateOfType(
-        new TypeMatcher<_FeedState>());
-    feedState.showModal = true;
+  onPressed() async {
+    Navigator.of(_context).push(new _PostCreateRoute(_context));
   }
 }
 
-class FeedModal extends StatefulWidget {
+class _PostCreateRoute extends TransitionRoute with LocalHistoryRoute {
+
+  final BuildContext context;
+
+  bool dismissed = false;
+
+  _PostCreateRoute(this.context);
+
 
   @override
-  State<StatefulWidget> createState() {
-    return new _FeedModalState();
+  Iterable<OverlayEntry> createOverlayEntries() {
+    var overlay = new OverlayEntry(builder: (context) {
+      Widget w;
+      w = new AnimatedBuilder(animation: animation, builder: (context, widget) {
+        Widget w = new PostCreate(onDismiss: onDismissed,);
+        print("animation ${animation.value}");
+        w = new Material(child: w, color: Colors.white.withOpacity(0.5),);
+        w = new CircularClip(child: w, clip: animation.value,);
+        w =
+        new FrostedGlass(child: w, sigma: animation.value * 5.0, opacity: 0.0,);
+
+        w = new DismissibleWrapper(child: w, direction: DismissDirection.down,
+          onDismissed: (x) => onDismissed(),
+          key: new Key("POST_CREATE"),);
+
+
+        return w;
+      });
+      return w;
+    },
+        opaque: false,
+        maintainState: true);
+
+    return [overlay];
   }
+
+
+  void onDismissed() {
+    this.controller.value=0.0;
+    Navigator.of(context).pop();
+  }
+
+  // TODO: implement opaque
+  @override
+  bool get opaque => false;
+
+  // TODO: implement transitionDuration
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 400);
 }
 
-class _FeedModalState extends State<FeedModal> with TickerProviderStateMixin {
-  AnimationController _clipController;
-  AnimationController _blurController;
-  double _fraction = 0.0;
-  double _blur = 0.0;
-  BuildContext _context;
+class PostCreateRoute extends PageRoute {
+
+  // TODO: implement barrierColor
   @override
-  Widget build(BuildContext context) {
-    _context = context;
-    Container container = new Container(
-      child: new BackdropFilter(
-        filter: new ImageFilter.blur(sigmaX: 5.0  , sigmaY: 5.0 ),
-        child: new Container(
-          decoration: new BoxDecoration(
-              color: Colors.white.withOpacity(0.7)
-          ),
-          child: new Center(
-            child: new PostCreate()
-          ),
-        ),
-      ),
-    );
-
-    Widget content = container;
-    if(_fraction < 1) {
-      content = new ClipOval(
-          child: container,
-          clipper: new _CustomClipper()
-            ..status = _fraction
-      );
-    }
-
-    Widget dismissible = new Dismissible(
-      key: new ObjectKey(this),
-      child: content,
-      direction: DismissDirection.down,
-      onDismissed: (x) {
-        _FeedState feedState = _context.ancestorStateOfType(new TypeMatcher<_FeedState>());
-        feedState?.showModal = false;
-      }
-      );
-
-    return dismissible;
-  }
+  Color get barrierColor => null;
 
   @override
-  void initState() {
-    super.initState();
-    _clipController = new AnimationController(vsync: this
-        , duration: const Duration(milliseconds: 200))
-      ..addListener(() =>
-          setState(() {
-            this._fraction = _clipController.value;
-          }
-          ));
-    _blurController = new AnimationController(vsync: this,
-    duration: const Duration(milliseconds: 150))
-    ..addListener(() => this.setState((){
-      this._blur = _blurController.value;
-    }));
-    _clipController.forward().then((x) => _blurController.forward());
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
+    Widget w = new PostCreate();
+    w = new Material(child: w, color: Colors.transparent,);
+    return w;
   }
 
+  // TODO: implement maintainState
+  @override
+  bool get maintainState => true;
+
+  // TODO: implement transitionDuration
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 500);
 }
 
-class _CustomClipper extends CustomClipper<Rect> {
-
-  double status = 1.0;
-
-  @override
-  Rect getClip(Size size) {
-    Rect rect = new Rect.fromCircle(
-        center: new Offset(size.width, size.height),
-        radius: status * (sqrt(pow(size.width, 2) + pow(size.height, 2)))
-    );
-
-    return rect;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Rect> oldClipper) {
-    return true;
-  }
-}
