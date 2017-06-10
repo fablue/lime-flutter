@@ -14,11 +14,16 @@ class LoadingListView<T> extends StatefulWidget {
   final bool reverse;
   final Indexer<T> indexer;
 
+  /// New elements will appear at the start
+  final Stream<T> topStream;
+
   LoadingListView(this.pageRequest, {
     this.pageSize: 50,
     this.pageThreshold:10,
-    @required this.widgetAdapter: null, this.reverse: false,
-    this.indexer
+    @required this.widgetAdapter: null,
+    this.reverse: false,
+    this.indexer,
+    this.topStream
   });
 
   @override
@@ -56,6 +61,14 @@ class _LoadingListViewState<T> extends State<LoadingListView<T>> {
   void initState() {
     super.initState();
     this.lockedLoadNext();
+    if(widget.topStream!=null){
+      widget.topStream.listen((T t){
+        setState((){
+          this.objects.insert(0, t);
+          this.reIndex();
+        });
+      });
+    }
   }
 
   Widget itemBuilder(BuildContext context, int index) {
@@ -130,6 +143,17 @@ class _LoadingListViewState<T> extends State<LoadingListView<T>> {
         this.index[widget.indexer(object)] = index;
       }
     });
+  }
+
+  void reIndex(){
+    this.index .clear();
+    if(widget.indexer!=null){
+      int i = 0;
+      this.objects.forEach((object){
+        index[widget.indexer(object)] == i;
+        i++;
+      });
+    }
   }
 }
 

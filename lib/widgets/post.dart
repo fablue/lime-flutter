@@ -94,10 +94,11 @@ class PostState extends State<Post> {
               new Container(
                   padding: new EdgeInsets.symmetric(
                       vertical: 8.0, horizontal: widget.paddingH),
-                  child: new Text(widget.post["message"])),
+                  child: new Text(widget.post["message"] != null
+                      ? widget.post["message"]
+                      : "")),
 
               new PostInteraction(widget.post),
-
               new LastComments(widget.post)
 
             ].where(notNull).toList()
@@ -147,9 +148,9 @@ class PostHeaderWidget extends StatelessWidget {
                 padding: new EdgeInsets.symmetric(horizontal: 12.0),
                 child: new Column(
                     children: [
-                      new Text(post["channel"],
+                      new Text(post["channel"] ?? "",
                           style: new TextStyle(fontWeight: FontWeight.bold)),
-                      new Text(post["realName"],
+                      new Text(post["realName"] ?? "",
                           style: new TextStyle(fontSize: 12.0)),
 
                       new PostLocationWidget(post)
@@ -444,7 +445,7 @@ class _LikingChannelsState extends State<LikingChannels> {
           new Container(
               padding: new EdgeInsets.only(left: 8.0, right: 4.0),
               child: new Text(
-                  widget.channels.length.toString(),
+                  widget.channels!=null?(widget.channels?.length.toString()) ?? "" : 0.toString(),
                   style: new TextStyle(
                       fontWeight: FontWeight.w300
                   )
@@ -468,7 +469,7 @@ class _LikingChannelsState extends State<LikingChannels> {
   String buildDisplayString() {
     String build = "";
     bool first = true;
-    widget.channels.forEach((String channel) {
+    widget.channels?.forEach((String channel) {
       build = "$build${!first ? "," : ""} $channel";
       first = false;
     });
@@ -512,7 +513,7 @@ class _LastCommentsState extends State<LastComments> {
     var innerF = () {
       List<TextSpan> list = new List();
 
-      int furtherComments = widget.comments - widget.lastComments.length;
+      int furtherComments = widget.comments??0 - widget.lastComments?.length??0;
       if (furtherComments > 0) {
         list.add(
             new TextSpan(
@@ -525,7 +526,7 @@ class _LastCommentsState extends State<LastComments> {
         );
       }
 
-      widget.lastComments.forEach(
+      widget.lastComments?.forEach(
               (comment) {
             list.add(
                 new TextSpan(

@@ -33,20 +33,22 @@ class Feed extends StatefulWidget {
 
 class _FeedState extends State<Feed> {
 
-  var _buildContext;
+  BuildContext _buildContext;
+  StreamController<Map> _postStreamController;
 
 
   @override
   Widget build(BuildContext context) {
+
     _buildContext = context;
 
     Widget w;
     w = new LoadingListView<Map>(
         request, widgetAdapter: adapt, pageSize: widget.pageSize,
-        pageThreshold: widget.pageThreshold);
+        pageThreshold: widget.pageThreshold, topStream: _postStreamController.stream,);
 
 
-    Widget fab = new FeedActionButton();
+    Widget fab = new FeedActionButton(onPosted: onPosted,);
 
 
     w = new Scaffold(
@@ -58,9 +60,15 @@ class _FeedState extends State<Feed> {
     return w;
   }
 
+  void onPosted(Map post){
+    _postStreamController.add(post);
+  }
+
+
   @override
   void initState() {
     super.initState();
+    _postStreamController = new StreamController();
   }
 
   Future<List<Map>> request(int page, int pageSize) async {
@@ -75,6 +83,10 @@ class _FeedState extends State<Feed> {
 }
 
 class FeedActionButton extends StatefulWidget {
+
+  final PostedCallback onPosted;
+
+  FeedActionButton({this.onPosted});
 
   @override
   State<StatefulWidget> createState() {
@@ -103,7 +115,10 @@ class _FeedActionButtonState extends State<FeedActionButton> {
   }
 
   onPressed() async {
-    Navigator.of(_context).push(new _PostCreateRoute(_context));
+    Map post = await Navigator.of(_context).push(new _PostCreateRoute(_context));
+    if(post != null && widget.onPosted!=null){
+      this.widget.onPosted(post);
+    }
   }
 }
 
@@ -121,7 +136,7 @@ class _PostCreateRoute extends TransitionRoute with LocalHistoryRoute {
     var overlay = new OverlayEntry(builder: (context) {
       Widget w;
       w = new AnimatedBuilder(animation: animation, builder: (context, widget) {
-        Widget w = new PostCreate(onDismiss: onDismissed,);
+        Widget w = new PostCreate(onDismiss: onDismissed, onPosted: onPosted,);
         print("animation ${animation.value}");
         w = new Material(child: w, color: Colors.white.withOpacity(0.5),);
         w = new CircularClip(child: w, clip: animation.value,);
@@ -143,6 +158,9 @@ class _PostCreateRoute extends TransitionRoute with LocalHistoryRoute {
     return [overlay];
   }
 
+  void onPosted(Map post){
+    Navigator.of(context).pop(post);
+  }
 
   void onDismissed() {
     this.controller.value=0.0;
@@ -156,28 +174,5 @@ class _PostCreateRoute extends TransitionRoute with LocalHistoryRoute {
   // TODO: implement transitionDuration
   @override
   Duration get transitionDuration => const Duration(milliseconds: 400);
-}
-
-class PostCreateRoute extends PageRoute {
-
-  // TODO: implement barrierColor
-  @override
-  Color get barrierColor => null;
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
-    Widget w = new PostCreate();
-    w = new Material(child: w, color: Colors.transparent,);
-    return w;
-  }
-
-  // TODO: implement maintainState
-  @override
-  bool get maintainState => true;
-
-  // TODO: implement transitionDuration
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 500);
 }
 

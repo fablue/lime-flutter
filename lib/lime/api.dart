@@ -8,7 +8,7 @@ import 'package:http_parser/http_parser.dart';
 class LimeApi {
   final Client client = createHttpClient();
   final String server = "https://lime.fablue.org";
-
+ // final String server = "http://192.168.0.98:8080";
 
   Future <List<Map<String, String>>> getTrends() async {
     String url = "$server/trend?latitude=$latitude&longitude=$longitude";

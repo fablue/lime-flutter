@@ -5,13 +5,18 @@ import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lime/lime/lime.dart';
 import 'package:lime/misc/utils.dart';
+import 'package:lime/widgets/frosted_glas.dart';
+
+typedef void PostedCallback(Map posting);
 
 class PostCreate extends StatefulWidget {
 
   final VoidCallback onDismiss;
+  final PostedCallback onPosted;
 
   PostCreate({
-    this.onDismiss
+    this.onDismiss,
+    this.onPosted
   });
 
   @override
@@ -20,14 +25,30 @@ class PostCreate extends StatefulWidget {
   }
 }
 
-class _PostCreateState extends State<PostCreate> {
+class _PostCreateState extends State<PostCreate>
+    with SingleTickerProviderStateMixin {
 
+  /// Any currently picked image file to display
   File _file;
+
+  /// The text currently entered
   String _text;
+
+  /// Indicating whether or not the
+  /// user is currently sending the post
+  /// to the server and is waiting for any
+  /// response.
+  bool _posting = false;
+
+  /// Animation which should display
+  /// a transition from normal state (=0) 
+  /// to posting state (=1)
+  Animation _postingAnimation;
+  AnimationController _postingAnimationController;
 
   @override
   Widget build(BuildContext context) {
-    return new Column(
+    Widget w = new Column(
         children: [
           new _Header(this),
           new _Body(this),
@@ -35,6 +56,9 @@ class _PostCreateState extends State<PostCreate> {
         ],
         mainAxisAlignment: MainAxisAlignment.spaceBetween
     );
+
+    w = new IgnorePointer(ignoring: _posting, child: w,);
+    return w;
   }
 
   set image(File file) {
@@ -46,22 +70,48 @@ class _PostCreateState extends State<PostCreate> {
   }
 
   Future onPost() async {
-    print("Postinng image: $_file with text: $_text");
-    List<int> image;
-    if (_file != null) {
-      int size = await _file.length();
-      image = await lime.site.commission(
-        ImageUtil.compressImage,
-        positionalArgs: [_file]
-      );
-      print("Compression done: first $size then ${image.length}");
-    }
+    this.setState(() => this._posting = true);
+    this._postingAnimationController.forward();
 
-  // Map response = await lime.api.postMessage(
-    //   text: _text, compressedImage: image);
-   // print(response);
+    try {
+      print("Postinng image: $_file with text: $_text");
+      List<int> image;
+      if (_file != null) {
+        int size = await _file.length();
+        image = await lime.site.commission(
+            ImageUtil.compressImage,
+            positionalArgs: [_file]
+        );
+        print("Compression done: first $size then ${image.length}");
+      }
+
+      Map response = await lime.api.postMessage(
+          text: _text, compressedImage: image);
+
+      if(widget.onPosted!=null){
+        widget.onPosted(response);
+      }
+
+    } catch (e) {
+      print("Posting failed: $e");
+      this._postingAnimationController.reverse();
+    }
+    finally {
+      this.setState(() => this._posting = false);
+    }
   }
 
+
+  @override
+  void initState() {
+    super.initState();
+    _postingAnimationController =
+    new AnimationController(
+        vsync: this, duration: const Duration(seconds: 1), value: 0.0);
+    _postingAnimation = new CurvedAnimation(
+        parent: _postingAnimationController, curve: Curves.ease);
+    _postingAnimation.addListener(() => this.setState(() {}));
+  }
 
 }
 
@@ -74,7 +124,8 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget child = new Row(
+    Widget w;
+    w = new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           new IconButton(
@@ -105,22 +156,23 @@ class _Header extends StatelessWidget {
         ]
     );
 
-    child = new Stack(
+    w = new Stack(
         alignment: FractionalOffset.center,
         children: [
-          child,
+          w,
           new Center(
               child: new Icon(Icons.drag_handle)
           )
         ]
     );
 
-    child = new Container(
-        margin: const EdgeInsets.only(top: 25.0),
-        child: child
+    w = new Container(
+      margin: const EdgeInsets.only(top: 25.0),
+      child: w,
     );
 
-    return child;
+    return new FractionalTranslation(translation: new FractionalOffset(
+        0.0, -_postCreateState._postingAnimation.value), child: w,);
   }
 
 
@@ -162,11 +214,11 @@ class _BodyState extends State<_Body> {
       );
     } else {
       child = new Image.file(image);
-
       child = new Material(
           child: child,
           borderRadius: new BorderRadius.all(new Radius.circular(5.0)),
           elevation: 5.0
+
       );
 
 
@@ -180,25 +232,21 @@ class _BodyState extends State<_Body> {
           resizeDuration: const Duration(milliseconds: 1)
       );
 
-      Widget stack0 = new Text(
-          "Swipe up to dismiss",
-          style: new TextStyle(
-              fontWeight: FontWeight.w300,
-              color: Theme
-                  .of(context)
-                  .primaryColor
-          )
-      );
+
+      List<Widget> stacked = [];
+      stacked.add(child);
 
 
-      Widget stack1 = child;
-
+      if (widget._postCreateState._posting) {
+        Widget w;
+        w = new LinearProgressIndicator();
+        stacked.add(w);
+      }
 
       child = new Stack(
-          children: [
-            stack0, stack1
-          ],
-          alignment: new FractionalOffset(0.5, 0.8)
+        children: stacked,
+        alignment: FractionalOffset.bottomCenter,
+        fit: StackFit.loose,
       );
 
       child = new Container(
@@ -213,6 +261,8 @@ class _BodyState extends State<_Body> {
   @override
   void initState() {
     super.initState();
+    this.widget._postCreateState._postingAnimation.addListener(() =>
+        this.setState(() {}));
   }
 
   Future pickImage() async {
@@ -232,7 +282,7 @@ class _Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    Widget w = new Container(
         padding: const EdgeInsets.all(16.0),
         child: new Row(
             children: [
@@ -248,5 +298,10 @@ class _Footer extends StatelessWidget {
             ]
         )
     );
+
+    w = new FractionalTranslation(translation: new FractionalOffset(
+        0.0, _postCreateState._postingAnimation.value), child: w,);
+
+    return w;
   }
 }
