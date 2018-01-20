@@ -178,7 +178,7 @@ class PostHeaderWidget extends StatelessWidget {
                       child: const Text('melden'), value: 'report'),
                 ],
                 elevation: 8.0),
-            translation: new FractionalOffset(0.0, -0.25))
+            translation: new Offset(0.0, -0.25))
       ].where(notNull).toList(),
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,

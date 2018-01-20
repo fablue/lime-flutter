@@ -171,7 +171,7 @@ class _Header extends StatelessWidget {
       child: w,
     );
 
-    return new FractionalTranslation(translation: new FractionalOffset(
+    return new FractionalTranslation(translation: new Offset(
         0.0, -_postCreateState._postingAnimation.value), child: w,);
   }
 
@@ -299,7 +299,7 @@ class _Footer extends StatelessWidget {
         )
     );
 
-    w = new FractionalTranslation(translation: new FractionalOffset(
+    w = new FractionalTranslation(translation: new Offset(
         0.0, _postCreateState._postingAnimation.value), child: w,);
 
     return w;
