@@ -11,7 +11,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
     devicePixelRatio: MediaQuery.of(context, nullOk: true)?.devicePixelRatio ?? 1.0,
     // TODO(ianh): provide the locale
     size: size,
-    platform: Platform.operatingSystem,
+    platform: TargetPlatform.android,
   );
 }
 
@@ -210,7 +210,7 @@ class FadingImage extends StatefulWidget {
 
   @override
   void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
+    //super.debugFillDescription(description);
     description.add('image: $image');
     if (width != null)
       description.add('width: $width');
@@ -318,7 +318,7 @@ class _ImageState extends State<FadingImage> with SingleTickerProviderStateMixin
       color: Color.lerp(Colors.white, Colors.transparent , _alpha),
       colorBlendMode: BlendMode.srcOver,
       fit: widget.fit,
-      alignment: widget.alignment,
+      alignment: Alignment.center,
       repeat: widget.repeat,
       centerSlice: widget.centerSlice,
     );
@@ -328,7 +328,7 @@ class _ImageState extends State<FadingImage> with SingleTickerProviderStateMixin
 
   @override
   void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
+    //super.debugFillDescription(description);
     description.add('stream: $_imageStream');
     description.add('pixels: $_imageInfo');
   }
